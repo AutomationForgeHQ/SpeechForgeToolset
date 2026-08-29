@@ -1,7 +1,7 @@
 {
   "FileVersion": 3,
   "Version": 1,
-  "VersionName": "0.1.0\r",
+  "VersionName": "0.1.0",
   "FriendlyName": "SpeechForge Toolset",
   "Description": "Exposes SpeechForge's pipeline as native Model Context Protocol tools, so an agent can author speech banks, price them, generate audio and manage graduation without a human driving the editor. Adapter only - it holds no pipeline logic and can be removed without affecting SpeechForge.",
   "Category": "Experimental",
