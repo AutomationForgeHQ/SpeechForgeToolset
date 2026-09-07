@@ -28,8 +28,18 @@ rather than a framework.
 |---|---|
 | **Discovery** | `ListSpeechAssets`, `GetSpeechLineStatus`, `ListSpeechProviders`, `GetSpeechProviderCapabilities`, `GetSpeechCredentialStatus`, `TestSpeechProviderConnection`, `ListProviderVoices` |
 | **Cost** | `EstimateSpeechCost` |
-| **Authoring** | `CreateOrUpdateSpeechBank`, `CreateSpeechVoice`, `ResolveSpeechVoice` |
+| **Authoring** | `CreateOrUpdateSpeechBank`, `UpdateSpeechLine`, `ResolveSpeechVoice` |
+| **Casting** | `CreateVoiceProfile`, `CreateOrUpdateSpeaker`, `ListSpeakers`, `ListVoiceProfiles`, `SetSpeechLineVoiceOverride` |
+| **Takes** | `GenerateSpeechTake`, `ListSpeechTakes`, `ApplySpeechTake`, `RegisterRecordedSpeechTake`, `MarkSpeechTakeChosen` |
 | **Pipeline** | `GenerateSpeech`, `RefetchSpeechLine`, `AcceptCurrentSpeechAudio`, `MarkSpeechLineRecorded`, `DetectEditedSpeechAudio` |
+
+Casting is two assets and one rule: a **voice profile** is an instrument (provider, preset, model,
+settings), a **speaker** is a character sheet that names one, and a line carries only a speaker id.
+Resolution walks the line's override, the speaker's sheet, the bank default, the project default.
+
+Takes are the production alternative to latest-wins: `GenerateSpeechTake` makes a candidate without
+touching the line, and `ApplySpeechTake` is what makes one the line - so a director can compare
+readings instead of regenerating over the last one.
 
 ---
 
