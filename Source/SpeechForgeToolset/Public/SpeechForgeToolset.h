@@ -40,7 +40,7 @@ class SPEECHFORGETOOLSET_API USpeechForgeToolset : public UToolsetDefinition
 
 public:
 
-	virtual FString GetToolsetVersion() const override { return TEXT("0.1"); }
+	virtual FString GetToolsetVersion() const override { return TEXT("0.2.1"); }
 
 	// ---------------------------------------------------------------------------------------------
 	// Discovery
@@ -221,6 +221,10 @@ public:
 	UFUNCTION(meta = (AICallable), Category = "SpeechForge|Navigation")
 	static FString GetSpeechBankSource(const FString& BankPath);
 
+	/**
+	 * What generating this bank would cost, without generating anything. Call it before
+	 * every run that spends: this is the tool the skill means by "price it first".
+	 */
 	UFUNCTION(meta = (AICallable), Category = "SpeechForge|Cost")
 	static FSpeechCostEstimate EstimateSpeechCost(
 		const TArray<FSpeechLineHandle>& Handles,
@@ -604,6 +608,7 @@ public:
 	UFUNCTION(meta = (AICallable), Category = "SpeechForge|Takes")
 	static FString RemoveSpeechTake(const FString& AssetPath, const FString& LineId, const FString& TakeId);
 
+	/** Removes one variant from a take, leaving the take and its other variants in place. */
 	UFUNCTION(meta = (AICallable), Category = "SpeechForge|Takes")
 	static FString RemoveSpeechTakeVariant(
 		const FString& AssetPath,
@@ -611,6 +616,7 @@ public:
 		const FString& TakeId,
 		const FString& VariantId);
 
+	/** Makes one variant of a take the current one. The others are kept, never deleted. */
 	UFUNCTION(meta = (AICallable), Category = "SpeechForge|Takes")
 	static FString SetSpeechTakeVariant(
 		const FString& AssetPath,
