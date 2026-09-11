@@ -4,11 +4,13 @@
 #include "SpeechForgeAsyncResult.h"
 #include "SpeechForge.h"
 #include "SpeechForgeSubsystem.h"
+#include "SpeechBank.h"
 #include "SpeechForgeSettings.h"
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "Containers/Ticker.h"
 #include "Editor.h"
+#include "Interfaces/IPluginManager.h"
 
 FString USpeechForgeToolset::ApplyRecordedAudio(
 	const FString& AssetPath, FName LineId, const FString& AudioSource)
@@ -798,6 +800,40 @@ UToolCallAsyncResultSpeechStatus* USpeechForgeToolset::WatchBatch(
 	return Async;
 }
 
+FString USpeechForgeToolset::ProduceSpeechBank(const FString& BankPath)
+{
+	USpeechForgeSubsystem* Subsystem = GetSubsystemChecked();
+	if (!Subsystem)
+	{
+		return FString();
+	}
+
+	USpeechBank* Bank = LoadObject<USpeechBank>(nullptr, *BankPath);
+	if (!Bank)
+	{
+		UKismetSystemLibrary::RaiseScriptError(
+			FString::Printf(TEXT("No speech bank at '%s'."), *BankPath));
+		return FString();
+	}
+
+	// A bank that produces its own way runs the whole thing; the confirmation an agent gives is
+	// the call itself, and the messages it would have shown a person come back as the answer.
+	TSharedRef<FString> Last = MakeShared<FString>();
+	FSpeechProduceCallbacks Callbacks;
+	Callbacks.Confirm = [Last](const FText& Question) { *Last = Question.ToString(); return true; };
+	Callbacks.OnProgress = [Last](const FText& Message) { *Last = Message.ToString(); };
+	if (Bank->ProduceAll(Callbacks))
+	{
+		return *Last;
+	}
+
+	const TArray<FSpeechLineHandle> Handles { FSpeechLineHandle(BankPath, NAME_None) };
+	const FString BatchId = Subsystem->GenerateLines(Handles, /*bForce=*/false);
+	return BatchId.IsEmpty()
+		? TEXT("Everything is current - nothing to generate.")
+		: FString::Printf(TEXT("Generating what is missing or stale in '%s' (batch %s)."), *Bank->GetName(), *BatchId);
+}
+
 UToolCallAsyncResultSpeechStatus* USpeechForgeToolset::GenerateSpeech(
 	const TArray<FSpeechLineHandle>& Handles, bool Force)
 {
@@ -860,4 +896,13 @@ int32 USpeechForgeToolset::DetectEditedSpeechAudio(const TArray<FSpeechLineHandl
 {
 	USpeechForgeSubsystem* Subsystem = GetSubsystemChecked();
 	return Subsystem ? Subsystem->DetectEditedAudio(Handles) : 0;
+}
+
+FString USpeechForgeToolset::GetToolsetVersion() const
+{
+	// The descriptor is the version. Reading it here rather than repeating it means there is no
+	// second copy to keep true - and no window, between a bump and a fix, where an agent is told
+	// a number the package does not carry.
+	const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT(UE_PLUGIN_NAME));
+	return Plugin.IsValid() ? Plugin->GetDescriptor().VersionName : FString();
 }

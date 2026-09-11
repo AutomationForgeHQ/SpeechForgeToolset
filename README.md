@@ -4,7 +4,7 @@
 can author speech banks, price them, generate audio and manage graduation without a human driving the
 editor.
 
-**Status: 0.2 — 44 tools and one skill.** First registered and driven live on 2026-08-11 with a
+**Status: 0.2 — <!-- forge:tools -->45 tools<!-- /forge:tools --> and one skill.** First registered and driven live on 2026-08-11 with a
 smaller surface; grown since as localisation and take-level tools shipped.
 
 Adapter only. Every function forwards to `USpeechForgeSubsystem` and adds nothing; all logic, state
@@ -25,7 +25,7 @@ rather than a framework.
 
 ## The tools
 
-44 tools across eleven categories. Every row is grounded in the function's own doc comment.
+<!-- forge:tools -->45 tools<!-- /forge:tools --> across eleven categories. Every row is grounded in the function's own doc comment.
 
 ### Discovery
 

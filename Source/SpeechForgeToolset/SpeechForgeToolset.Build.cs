@@ -20,6 +20,7 @@ public class SpeechForgeToolset : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"Projects",         // IPluginManager, so GetToolsetVersion() reads the descriptor
 				"UnrealEd",         // GEditor, to reach the editor subsystem
 			}
 			);

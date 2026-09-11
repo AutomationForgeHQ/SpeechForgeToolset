@@ -40,7 +40,15 @@ class SPEECHFORGETOOLSET_API USpeechForgeToolset : public UToolsetDefinition
 
 public:
 
-	virtual FString GetToolsetVersion() const override { return TEXT("0.2.1"); }
+	/**
+	 * The version an agent is told it is talking to, read from this plugin's own descriptor.
+	 *
+	 * Defined in the .cpp deliberately. UE_PLUGIN_NAME is a private UBT definition, correct
+	 * only inside this module; a body here in a public header would resolve it to whichever
+	 * plugin included the header. Nothing in this class is a second copy of the version, so
+	 * there is nothing here that can drift from it.
+	 */
+	virtual FString GetToolsetVersion() const override;
 
 	// ---------------------------------------------------------------------------------------------
 	// Discovery
@@ -665,6 +673,23 @@ public:
 	static UToolCallAsyncResultSpeechStatus* GenerateSpeech(
 		const TArray<FSpeechLineHandle>& Handles,
 		bool Force);
+
+	/**
+	 * Produce a whole bank the bank's own way - the agent-side twin of the panel's Generate All.
+	 *
+	 * A plain bank generates what is missing or stale, exactly as Generate Speech would with one
+	 * bank handle. A localised bank does more: it generates the lines whose source is synthesis,
+	 * dubs the lines whose source is a performance (the actor's timing and voice, the new words),
+	 * and afterwards points every face bank serving it at the new audio, so a solve there lets the
+	 * dubbed lines follow the captured performance underneath.
+	 *
+	 * **Spends money on both halves the moment each request is sent**, synthesis by the character
+	 * and dubbing by the minute of source audio. Returns once the work has been started; watch
+	 * Get Speech Line Status for the lines settling, and read the returned sentence for what was
+	 * planned.
+	 */
+	UFUNCTION(meta = (AICallable), Category = "SpeechForge|Pipeline")
+	static FString ProduceSpeechBank(const FString& BankPath);
 
 	/**
 	 * Fetch a line's existing audio again from the provider, without regenerating it.
